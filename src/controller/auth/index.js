@@ -14,7 +14,7 @@ const AuthController = {
         },
       });
 
-      if (chcecker) return res.status(409).json({ message: 'Email is taken' });
+      if (chcecker) res.status(409).json({ message: 'Email is taken' });
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -42,13 +42,12 @@ const AuthController = {
         },
       });
 
-      if (!user)
-        return res.status(401).json({ message: 'Email is not correct' });
+      if (!user) res.status(401).json({ message: 'Email is not correct' });
 
       const comparePassword = await bcrypt.compare(password, user.password);
 
       if (!comparePassword)
-        return res.status(401).json({ message: 'Password incorrect' });
+        res.status(401).json({ message: 'Password incorrect' });
 
       const data = {
         id: user.id,
@@ -56,11 +55,22 @@ const AuthController = {
         email: user.email,
       };
 
-      const token = jwt.sign(data, process.env.JSON_WEB_TOKEN, {
+      // Generate JWT token
+      const token = jwt.sign(data, process.env.JWT_SECRET_KEY, {
         expiresIn: '1h',
       });
 
-      res.status(200).json({ message: 'Signed in successfully', data, token });
+      // Send token in response
+      // res
+      //   .cookie('token', token, {
+      //     httpOnly: true,
+      //     maxAge: 1000 * 60 * 60, // 1 hour
+      //   })
+      //   .json({ message: 'Login successful',token, user: { email: user.email } });
+
+      res
+        .status(201)
+        .json({ message: 'Signed in successfully', user: data, token });
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'Signin Error' });
