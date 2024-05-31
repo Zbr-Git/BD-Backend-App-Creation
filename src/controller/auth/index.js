@@ -1,6 +1,7 @@
 import UserModel from '../../Model/User/index.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import TokenModel from '../../Model/Token/token.js';
 
 const AuthController = {
   signup: async (req, res) => {
@@ -58,6 +59,10 @@ const AuthController = {
       // Generate JWT token
       const token = jwt.sign(data, process.env.JWT_SECRET_KEY, {
         expiresIn: '1h',
+      });
+
+      await TokenModel.create({
+        token,
       });
 
       // Send token in response
